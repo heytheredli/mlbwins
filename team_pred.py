@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.ensemble import GradientBoostingRegressor as gbr
 import numpy as np
+import pickle as pkl
 
 jaysdata = pd.read_csv('data/bluejays.csv', delimiter = ',')
 
@@ -11,7 +12,7 @@ teams = ['redsox', 'orioles', 'rays', 'whitesox', 'indians',
         'pirates', 'padres', 'giants', 'cardinals', 'nationals']
 
 data = pd.read_csv('data/yankees.csv', delimiter = ',')
-traindata = data.drop(['Lg', 'L', 'Year'],axis=1)
+traindata = data.drop(['Lg', 'L', 'Year'], axis=1)
 for team in teams:
     data = pd.read_csv('data/{0}.csv'.format(team), delimiter = ',')
     traindata = traindata.append(data.drop(['Lg', 'L', 'Year'],axis=1)).reset_index().drop(['index'], axis=1)
@@ -42,6 +43,16 @@ testdata = testdata.fillna(0)
 test_xcol = testdata.drop(['W'], axis=1).drop([0], axis=0).reset_index()
 test_ycol = testdata['W'].drop([len(testdata)-1])
 
-r_square = model.score(test_xcol, test_ycol)
-predictions = model.predict(test_xcol)
-print r_square
+new_r_square = model.score(test_xcol, test_ycol)
+
+with open('model.pkl', 'rb') as handle:
+    curmodel = pkl.load(handle)
+
+cur_r_square = curmodel.score(test_xcol, test_ycol)
+
+if new_r_square > cur_r_square:
+    with open('model.pkl', 'wb') as handle:
+        pkl.dump(model, handle)
+    print new_r_square
+else :
+    print cur_r_square
