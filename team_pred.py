@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.ensemble import GradientBoostingRegressor as gbr
 import numpy as np
 import pickle as pkl
+from sklearn.neural_network import MLPRegressor as mlp
 
 jaysdata = pd.read_csv('data/bluejays.csv', delimiter = ',')
 
@@ -45,6 +46,17 @@ test_ycol = testdata['W'].drop([len(testdata)-1])
 
 new_r_square = model.score(test_xcol, test_ycol)
 
+
+hidden_layer_sizes = (100, 10)
+mlpnn = mlp(hidden_layer_sizes=hidden_layer_sizes)
+
+mlp_model = mlpnn.fit(train_xcol, target)
+mlp_r_square = mlp_model.score(test_xcol, test_ycol)
+
+if mlp_r_square > new_r_square:
+    new_r_square = mlp_r_square
+    model = mlp_model
+
 with open('model.pkl', 'rb') as handle:
     curmodel = pkl.load(handle)
 
@@ -56,3 +68,4 @@ if new_r_square > cur_r_square:
     print new_r_square
 else :
     print cur_r_square
+    print new_r_square
